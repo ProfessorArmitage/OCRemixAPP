@@ -1,13 +1,14 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Home, Disc3, Library, User, Dice6 } from 'lucide-react'
+import { Home, Disc3, Library, User, Dice6, Gamepad2 } from 'lucide-react'
 import { usePlayerStore } from '../stores/playerStore'
 import MiniPlayer from './MiniPlayer'
 
 const NAV = [
-  { to: '/',        icon: Home,    label: 'Home'    },
-  { to: '/catalog', icon: Disc3,   label: 'Catalog' },
-  { to: '/library', icon: Library, label: 'Library' },
-  { to: '/profile', icon: User,    label: 'Profile' },
+  { to: '/',        icon: Home,     label: 'Home'    },
+  { to: '/catalog', icon: Disc3,    label: 'Catalog' },
+  { to: '/browse',  icon: Gamepad2, label: 'Browse'  },
+  { to: '/library', icon: Library,  label: 'Library' },
+  { to: '/profile', icon: User,     label: 'Profile' },
 ]
 
 export default function Layout() {

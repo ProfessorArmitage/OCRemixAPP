@@ -137,3 +137,32 @@ export async function getMeta(key: string): Promise<string | null> {
 export async function setMeta(key: string, value: string): Promise<void> {
   await db.catalog_meta.put({ key, value })
 }
+
+// ─── Browse stats ─────────────────────────────────────────────────────────────
+
+export interface GameStat   { name: string; count: number; imageUrl?: string }
+export interface SystemStat { name: string; count: number }
+
+export async function getGamesWithStats(): Promise<GameStat[]> {
+  const all = await db.remixes.orderBy('game').toArray()
+  const map = new Map<string, GameStat>()
+  for (const r of all) {
+    if (!r.game || r.game === 'Unknown') continue
+    const e = map.get(r.game)
+    if (e) { e.count++; if (!e.imageUrl && r.imageUrl) e.imageUrl = r.imageUrl }
+    else     map.set(r.game, { name: r.game, count: 1, imageUrl: r.imageUrl })
+  }
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name))
+}
+
+export async function getSystemsWithStats(): Promise<SystemStat[]> {
+  const all = await db.remixes.orderBy('system').toArray()
+  const map = new Map<string, SystemStat>()
+  for (const r of all) {
+    if (!r.system) continue
+    const e = map.get(r.system)
+    if (e) e.count++
+    else    map.set(r.system, { name: r.system, count: 1 })
+  }
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name))
+}

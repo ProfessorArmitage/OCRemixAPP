@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronDown, Heart, Download, Play, Pause,
+  ChevronDown, Heart, Download, Info, Play, Pause,
   SkipBack, SkipForward, Repeat, Repeat1, Shuffle, Dice6, Music2
 } from 'lucide-react'
 import { usePlayerStore } from '../stores/playerStore'
@@ -92,6 +92,13 @@ export default function Player() {
               title="Download MP3"
             >
               <Download size={20} className="text-text-muted hover:text-success transition-colors" />
+            </button>
+            <button
+              onClick={() => navigate(`/remix/${currentRemix.id}`)}
+              className="p-2 rounded-lg hover:bg-elevated transition-colors"
+              title="View remix details"
+            >
+              <Info size={20} className="text-text-muted hover:text-primary-light transition-colors" />
             </button>
           </div>
         </div>

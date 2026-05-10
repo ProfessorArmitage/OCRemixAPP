@@ -1,4 +1,5 @@
-import { Music2, Heart, HardDrive } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Music2, Heart, HardDrive, Info } from 'lucide-react'
 import { usePlayerStore } from '../stores/playerStore'
 import type { Remix } from '../types'
 
@@ -10,13 +11,18 @@ interface Props {
 
 export default function RemixCard({ remix, queue, compact }: Props) {
   const { playRemix, currentRemix, isPlaying } = usePlayerStore()
-  const isCurrent = currentRemix?.id === remix.id
+  const navigate   = useNavigate()
+  const isCurrent  = currentRemix?.id === remix.id
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => playRemix(remix, queue)}
-      className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all
+      onKeyDown={e => e.key === 'Enter' && playRemix(remix, queue)}
+      className={`w-full flex items-center gap-3 rounded-xl text-left transition-all cursor-pointer
         hover:bg-elevated group
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50
         ${isCurrent
           ? 'bg-primary-dim border border-primary/30 shadow-glow-sm'
           : 'bg-surface border border-border hover:border-border-light'
@@ -52,17 +58,28 @@ export default function RemixCard({ remix, queue, compact }: Props) {
         </p>
       </div>
 
-      {/* Meta */}
-      <div className="flex flex-col items-end gap-1 shrink-0">
-        {remix.isFavorite  && <Heart   size={13} className="text-error fill-error" />}
-        {remix.isDownloaded && <HardDrive  size={13} className="text-success" />}
+      {/* Meta — stopPropagation prevents play when clicking ⓘ */}
+      <div
+        className="flex flex-col items-end gap-1 shrink-0"
+        onClick={e => e.stopPropagation()}
+      >
+        {remix.isFavorite   && <Heart     size={13} className="text-error fill-error" />}
+        {remix.isDownloaded && <HardDrive size={13} className="text-success" />}
         {remix.system && (
           <span className="font-mono text-[10px] text-text-muted border border-border rounded px-1">
             {remix.system}
           </span>
         )}
+        <button
+          onClick={() => navigate(`/remix/${remix.id}`)}
+          className="p-0.5 text-text-muted hover:text-primary-light transition-colors"
+          title="View details"
+          aria-label={`View details for ${remix.title}`}
+        >
+          <Info size={13} />
+        </button>
       </div>
-    </button>
+    </div>
   )
 }
 
