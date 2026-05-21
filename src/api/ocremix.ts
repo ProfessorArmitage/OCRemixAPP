@@ -4,7 +4,7 @@ import type { Remix } from '../types'
 // ─── Routing ──────────────────────────────────────────────────────────────────
 // DEV:  /ocr/* → Vite proxy → https://ocremix.org/* (server-side, no CORS)
 // PROD: /ocr/* → Vercel rewrite → https://ocremix.org/* (same path, no CORS)
-const BASE_PATH   = '/api/ocr'
+const BASE_PATH   = '/ocr'
 const OCR_DIRECT  = 'https://ocremix.org'          // for MP3 URLs (html5 audio is permissive)
 
 // ─── Axios ────────────────────────────────────────────────────────────────────
@@ -270,20 +270,15 @@ export async function fetchRemixBatch(
 }
 
 export async function getLatestRemixId(): Promise<number> {
-  // Binary search over OCR IDs — edge function resolves redirects server-side,
-  // so 404s return 404 and valid IDs return 200.
-  let low = 4000, high = 5500
-  while (low < high - 1) {
-    const mid = Math.floor((low + high) / 2)
-    try {
-      const res = await http.head(BASE_PATH + '/remix/OCR' + String(mid).padStart(5, '0'))
-      if (res.status < 400) low = mid
-      else high = mid
-    } catch {
-      high = mid
-    }
-  }
-  return low
+  // Derive the latest OCR ID from the JS feed — no HEAD probing needed.
+  // OCRemix redirects both valid (slug redirect) and invalid (404.php) URLs,
+  // making HEAD-based binary search unreliable across the Vercel proxy layer.
+  try {
+    const { data: js } = await http.get<string>(BASE_PATH + '/feeds/javascript/')
+    const nums = [...js.matchAll(/OCR(\d+)/g)].map(m => parseInt(m[1], 10))
+    if (nums.length > 0) return Math.max(...nums)
+  } catch { /* fall through */ }
+  return 4800  // safe upper bound — batch sync skips any non-existent IDs
 }
 
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
