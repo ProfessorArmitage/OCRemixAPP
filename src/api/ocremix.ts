@@ -229,7 +229,7 @@ const CDN_PROXIES: [RegExp, string][] = [
   [/^https?:\/\/(?:www\.)?ocremix\.org\/files\/music/,   '/cdn/ocremix/files/music'],
 ]
 
-function proxyAudioUrl(url: string): string {
+export function proxyAudioUrl(url: string): string {
   for (const [re, proxy] of CDN_PROXIES) {
     if (re.test(url)) return url.replace(re, proxy)
   }
