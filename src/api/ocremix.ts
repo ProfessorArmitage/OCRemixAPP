@@ -220,17 +220,16 @@ function parseRemixPage(id: string, html: string): Partial<Remix> {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// ─── Proxy audio CDN URLs through Vite in development ────────────────────────
+// ─── Proxy audio CDN URLs (dev: Vite proxy / prod: Vercel rewrites) ──────────
+// iterations.org and djpretzel block hotlinks from non-ocremix.org referers.
+// Routing through our own domain (server-side) bypasses that check.
 const CDN_PROXIES: [RegExp, string][] = [
-  [/^https?:\/\/iterations\.org/,              '/cdn/iterations'],
-  [/^https?:\/\/djpretzel\.web\.aplus\.net/, '/cdn/djpretzel'],
-  // Proxy placeholder OCRemix URLs too — if they redirect to a CDN,
-  // the server-side Vite proxy follows the redirect cleanly
-  [/^https?:\/\/(?:www\.)?ocremix\.org\/files\/music/, '/cdn/ocremix/files/music'],
+  [/^https?:\/\/iterations\.org/,                        '/cdn/iterations'],
+  [/^https?:\/\/djpretzel\.web\.aplus\.net/,             '/cdn/djpretzel'],
+  [/^https?:\/\/(?:www\.)?ocremix\.org\/files\/music/,   '/cdn/ocremix/files/music'],
 ]
 
 function proxyAudioUrl(url: string): string {
-  if (!import.meta.env.DEV) return url
   for (const [re, proxy] of CDN_PROXIES) {
     if (re.test(url)) return url.replace(re, proxy)
   }
