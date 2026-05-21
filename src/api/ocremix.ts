@@ -8,7 +8,10 @@ const BASE_PATH   = '/ocr'
 const OCR_DIRECT  = 'https://ocremix.org'          // for MP3 URLs (html5 audio is permissive)
 
 // ─── Axios ────────────────────────────────────────────────────────────────────
-const http = axios.create({ timeout: 25_000 })
+// maxRedirects: 0 — prevents axios from following 301/302 redirects
+// (ocremix.org redirects missing pages to /404.php with an absolute URL,
+//  which the browser would follow directly, bypassing the proxy and hitting CORS)
+const http = axios.create({ timeout: 25_000, maxRedirects: 0 })
 
 // ─── Latest remixes — homepage scraping ───────────────────────────────────────
 //
