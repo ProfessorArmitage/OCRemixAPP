@@ -1,4 +1,5 @@
 import { Howl, Howler } from 'howler'
+import { proxyAudioUrl } from '../api/ocremix'
 import type { Remix } from '../types'
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -34,7 +35,7 @@ export function loadAndPlay(remix: Remix): Promise<void> {
     updateMediaSession(remix)
 
     howl = new Howl({
-      src:   [remix.mp3Url],
+      src:   [proxyAudioUrl(remix.mp3Url)],
       html5: true,          // stream without full download
       format: ['mp3'],
       onplay:  () => { emit('play');  resolve() },
