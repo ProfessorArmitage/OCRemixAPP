@@ -4,7 +4,7 @@ import type { Remix } from '../types'
 // ─── Routing ──────────────────────────────────────────────────────────────────
 // DEV:  /ocr/* → Vite proxy → https://ocremix.org/* (server-side, no CORS)
 // PROD: /ocr/* → Vercel rewrite → https://ocremix.org/* (same path, no CORS)
-const BASE_PATH   = '/ocr'
+const BASE_PATH   = '/api/ocr'
 const OCR_DIRECT  = 'https://ocremix.org'          // for MP3 URLs (html5 audio is permissive)
 
 // ─── Axios ────────────────────────────────────────────────────────────────────
@@ -269,26 +269,19 @@ export async function fetchRemixBatch(
   return results
 }
 
-// redirect:'manual' is the browser-native way to detect redirects without following them.
-// axios maxRedirects:0 only works in Node.js — in the browser the browser itself follows
-// redirects and axios cannot stop it. With fetch+redirect:'manual', a 3xx response returns
-// an opaque redirect (status 0, ok false) without the browser making the cross-origin request.
-async function remixExists(numericId: number): Promise<boolean> {
-  try {
-    const url = BASE_PATH + '/remix/OCR' + String(numericId).padStart(5, '0')
-    const res = await fetch(url, { method: 'HEAD', redirect: 'manual' })
-    return res.ok  // true = 2xx (exists); false = opaqueredirect 3xx (404.php redirect)
-  } catch {
-    return false
-  }
-}
-
 export async function getLatestRemixId(): Promise<number> {
+  // Binary search over OCR IDs — edge function resolves redirects server-side,
+  // so 404s return 404 and valid IDs return 200.
   let low = 4000, high = 5500
   while (low < high - 1) {
     const mid = Math.floor((low + high) / 2)
-    if (await remixExists(mid)) low = mid
-    else high = mid
+    try {
+      const res = await http.head(BASE_PATH + '/remix/OCR' + String(mid).padStart(5, '0'))
+      if (res.status < 400) low = mid
+      else high = mid
+    } catch {
+      high = mid
+    }
   }
   return low
 }
