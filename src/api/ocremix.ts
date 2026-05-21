@@ -8,10 +8,7 @@ const BASE_PATH   = '/ocr'
 const OCR_DIRECT  = 'https://ocremix.org'          // for MP3 URLs (html5 audio is permissive)
 
 // ─── Axios ────────────────────────────────────────────────────────────────────
-// maxRedirects: 0 — prevents axios from following 301/302 redirects
-// (ocremix.org redirects missing pages to /404.php with an absolute URL,
-//  which the browser would follow directly, bypassing the proxy and hitting CORS)
-const http = axios.create({ timeout: 25_000, maxRedirects: 0 })
+const http = axios.create({ timeout: 25_000 })
 
 // ─── Latest remixes — homepage scraping ───────────────────────────────────────
 //
@@ -272,16 +269,26 @@ export async function fetchRemixBatch(
   return results
 }
 
+// redirect:'manual' is the browser-native way to detect redirects without following them.
+// axios maxRedirects:0 only works in Node.js — in the browser the browser itself follows
+// redirects and axios cannot stop it. With fetch+redirect:'manual', a 3xx response returns
+// an opaque redirect (status 0, ok false) without the browser making the cross-origin request.
+async function remixExists(numericId: number): Promise<boolean> {
+  try {
+    const url = BASE_PATH + '/remix/OCR' + String(numericId).padStart(5, '0')
+    const res = await fetch(url, { method: 'HEAD', redirect: 'manual' })
+    return res.ok  // true = 2xx (exists); false = opaqueredirect 3xx (404.php redirect)
+  } catch {
+    return false
+  }
+}
+
 export async function getLatestRemixId(): Promise<number> {
   let low = 4000, high = 5500
   while (low < high - 1) {
     const mid = Math.floor((low + high) / 2)
-    try {
-      await http.head(BASE_PATH + '/remix/OCR' + String(mid).padStart(5, '0'))
-      low = mid
-    } catch {
-      high = mid
-    }
+    if (await remixExists(mid)) low = mid
+    else high = mid
   }
   return low
 }
