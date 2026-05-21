@@ -2,6 +2,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/ocr/:path*", "destination": "https://ocremix.org/:path*" }
+    { "source": "/ocr/:path*",            "destination": "https://ocremix.org/:path*" },
+    { "source": "/cdn/iterations/:path*", "destination": "https://iterations.org/:path*" },
+    { "source": "/cdn/djpretzel/:path*",  "destination": "http://djpretzel.web.aplus.net/:path*" },
+    { "source": "/cdn/ocremix/:path*",    "destination": "https://ocremix.org/:path*" }
   ]
 }
