@@ -3,9 +3,8 @@ import type { Remix } from '../types'
 
 // ─── Routing ──────────────────────────────────────────────────────────────────
 // DEV:  /ocr/* → Vite proxy → https://ocremix.org/* (server-side, no CORS)
-// PROD: deploy a reverse proxy and point PROD_PROXY to it
-const PROD_PROXY  = 'https://your-proxy.example.com/ocr'
-const BASE_PATH   = import.meta.env.DEV ? '/ocr' : PROD_PROXY
+// PROD: /ocr/* → Vercel rewrite → https://ocremix.org/* (same path, no CORS)
+const BASE_PATH   = '/ocr'
 const OCR_DIRECT  = 'https://ocremix.org'          // for MP3 URLs (html5 audio is permissive)
 
 // ─── Axios ────────────────────────────────────────────────────────────────────
