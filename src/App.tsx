@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Layout      from './components/Layout'
+import Layout           from './components/Layout'
+import PWAUpdatePrompt  from './components/PWAUpdatePrompt'
 import Home        from './pages/Home'
 import Catalog     from './pages/Catalog'
 import Browse      from './pages/Browse'
@@ -11,6 +12,7 @@ import RemixDetail from './pages/RemixDetail'
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <PWAUpdatePrompt />
       <Routes>
         <Route element={<Layout />}>
           <Route index             element={<Home />}        />

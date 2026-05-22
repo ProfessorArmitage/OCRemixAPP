@@ -51,7 +51,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'favicon.svg'],
       manifest: {
         name:             'OC ReMix Player',
@@ -69,7 +69,14 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
+          // OCRemix API/scraping: always fresh, never cached
+          {
+            urlPattern: /\/ocr\//,
+            handler:    'NetworkOnly',
+          },
+          // Audio CDN: cache aggressively (streams are large)
           {
             urlPattern: /\/cdn\//,
             handler:    'CacheFirst',
